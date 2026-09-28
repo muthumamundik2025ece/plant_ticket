@@ -29,7 +29,27 @@ $env:DB_USERNAME = "cropadvisor"
 $env:DB_PASSWORD = "your-local-password"
 ```
 
-The application reads `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`. Defaults target a local MySQL instance using the `root` account with an empty password. Hibernate schema update is enabled for this foundation.
+The application reads `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`. Defaults target a local MySQL instance using the `root` account with an empty password. Flyway applies versioned migrations from `src/main/resources/db/migration`; Hibernate is configured with `ddl-auto=validate` and will fail startup if entity mappings and the migrated schema disagree. Schema changes should be introduced as new migrations. The application does not automatically reset or update tables.
+
+## Database relationships
+
+```mermaid
+erDiagram
+  REGION ||--o{ FARMER : serves
+  REGION ||--o{ OFFICER : contains
+  REGION ||--o{ TICKET : filed_in
+  FARMER ||--o{ TICKET : submits
+  CROP ||--o{ TICKET : concerns
+  OFFICER o|--o{ TICKET : assigned_to
+  TICKET ||--o{ TICKET_RESPONSE : has
+  FARMER o|--o{ TICKET_RESPONSE : authors
+  OFFICER o|--o{ TICKET_RESPONSE : authors
+  TICKET ||--o{ TICKET_STATUS_HISTORY : records
+  FARMER o|--o{ TICKET_STATUS_HISTORY : changes
+  OFFICER o|--o{ TICKET_STATUS_HISTORY : changes
+```
+
+Each ticket has a generated internal primary key and a unique UUID ticket number. A ticket belongs to one farmer, crop, and region; it may be assigned to an officer. Responses and status transitions are separate append-oriented records, each linked to a ticket. A response must have exactly one farmer or officer author; a status transition may have at most one actor. Resolution and escalation metadata are stored on the ticket. Foreign keys, uniqueness constraints, lookup indexes, and basic database checks are included in the initial `V1` migration.
 
 ## Build and run
 
