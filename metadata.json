@@ -1,0 +1,6 @@
+{
+  "name": "CropAdvisor – Crop Disease Query and Advisory Ticketing System",
+  "description": "Agricultural ticketing system connecting farmers with regional agricultural officers for crop disease diagnostics, workload-balanced assignments, advisory recommendations, and automatic escalation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
